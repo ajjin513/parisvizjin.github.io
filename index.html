@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+    <link rel="stylesheet" href="style.css">
+
+<head>
+    <title>Paris Olympic Data Visualization</title>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var backgroundImage = new Image();
+        backgroundImage.src = 'photos/Color.jpeg'; 
+
+        var world = {
+            width: 3000, //뮤지엄 크기
+            width1: 100,
+            height: canvas.height
+        };
+
+        var camera = {
+            x: 0,
+            y: 0,
+            targetY: 0, 
+            width: canvas.width,
+            height: canvas.height
+        };
+
+        var character = {
+            width: 30,
+            height: 50,
+            x: world.width1, 
+            y: 0,
+            speed: 5,
+            dx: 0 
+        };
+
+        var ground = {
+            x: 0,
+            y: canvas.height - 20,
+            width: world.width,
+            height: 20
+        };
+
+        var portraits = [];
+        var numPortraits = 6;
+        var spacing = world.width / (numPortraits + 1);
+
+        for (var i = 1; i <= numPortraits; i++) {
+            portraits.push({
+                x: spacing * 1 - 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 1",
+                message: "Vizualization 1!"
+            });
+
+            portraits.push({
+                x: spacing * 2 - 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 2",
+                message: "Vizualization 2!"
+            });
+
+            portraits.push({
+                x: spacing * 3 - 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 3",
+                message: "Vizualization 3!"
+            });
+
+            portraits.push({
+                x: spacing * 4 - 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 4",
+                message: "Vizualization 4"
+
+            });
+
+            portraits.push({
+                x: spacing * 5 - 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 5",
+                message: "Vizualization 5"
+
+            });
+
+            portraits.push({
+                x: spacing * 6- 50, 
+                y: ground.y - 200, 
+                width: 100,
+                height: 150,
+                text: "Portrait 6",
+                message: "vizualization 6"
+            });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            camera.width = canvas.width;
+            camera.height = canvas.height;
+
+            ground.y = canvas.height - ground.height;
+
+            character.y = ground.y - character.height;
+
+            // 명화 높이 조정
+            for (var i = 0; i < portraits.length; i++) {
+                portraits[i].y = ground.y - portraits[i].height - 200; 
+            }
+        }
+
+        resizeCanvas();
+
+        window.addEventListener('resize', resizeCanvas);
+
+        var interacting = false;
+        var currentPortrait = null;
+        var keyPressedW = false;
+
+
+        document.addEventListener('keydown', keyDownHandler);
+        document.addEventListener('keyup', keyUpHandler);
+
+        function keyDownHandler(e) {
+            if (e.key === 'Right' || e.key === 'ArrowRight') {
+                character.dx = character.speed;
+            } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+                character.dx = -character.speed;
+            } else if (e.key === 'w' || e.key === 'W') {
+                keyPressedW = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (
+                e.key === 'Right' ||
+                e.key === 'ArrowRight' ||
+                e.key === 'Left' ||
+                e.key === 'ArrowLeft'
+            ) {
+                character.dx = 0;
+            } else if (e.key === 'w' || e.key === 'W') {
+                keyPressedW = false;
+            }
+        }
+
+        /* function update() {
+            character.x += character.dx;
+
+            if (character.x < 0) character.x = 0;
+            if (character.x + character.width > world.width)
+                character.x = world.width - character.width;
+
+            /*interacting = false;
+            for (var i = 0; i < portraits.length; i++) {
+                var portrait = portraits[i];
+                var centerX = portrait.x + portrait.width / 2;
+                var threshold = 20; // Acceptable margin for interaction
+
+                if (
+                    character.x + character.width / 2 > centerX - threshold &&
+                    character.x + character.width / 2 < centerX + threshold
+                ) {
+                    interacting = true;
+                    currentPortrait = portrait;
+                    break;
+                }
+            } */
+
+            /*interacting = false;
+            currentPortrait = null;
+
+            for (var i = 0; i < portraits.length; i++) {
+                var portrait = portraits[i];
+                if (
+                    character.x + character.width > portrait.x &&
+                    character.x < portrait.x + portrait.width
+                ) {
+                    interacting = true;
+                    currentPortrait = portrait;
+                     break;
+                }
+            }
+
+            camera.x = character.x + character.width / 2 - canvas.width / 2;
+
+            if (camera.x < 0) camera.x = 0;
+            if (camera.x + camera.width > world.width)
+                camera.x = world.width - camera.width;
+
+            if (interacting && keyPressedW) {
+                camera.targetY = -500; // 카메라 위로 가게 하기
+            } else {
+                camera.targetY = 0; // 다시 돌아오기
+                currentPortrait = null;
+            }
+ 
+
+            var cameraSpeed = 0.1;
+            camera.y += (camera.targetY - camera.y) * cameraSpeed;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+
+            ctx.translate(-camera.x, -camera.y);
+
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+
+            ctx.fillStyle = '#abcdef';
+            for (var i = 0; i < portraits.length; i++) {
+                var portrait = portraits[i];
+                ctx.fillRect(portrait.x, portrait.y, portrait.width, portrait.height);
+
+                ctx.strokeStyle = '#342423';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(portrait.x, portrait.y, portrait.width, portrait.height);
+            }
+
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(
+                character.x,
+                character.y,
+                character.width,
+                character.height
+            );
+
+            if (interacting && currentPortrait) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(
+                    character.x - 100,
+                    character.y - 150,
+                    230,
+                    100
+                );
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '20px Arial';
+                ctx.fillText(
+                    currentPortrait.text,
+                    character.x - 90,
+                    character.y - 110
+                );
+
+                var time = Date.now() * 0.005;
+                var floatY = Math.sin(time) * 5;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '16px Arial';
+                ctx.fillText(
+                    'This is an amazing piece of art!',
+                    character.x - 90,
+                    character.y - 80 + floatY
+                );
+            }
+
+            // 데이터 초기화
+            ctx.restore();
+        } */ 
+function update() {
+    character.x += character.dx;
+
+    if (character.x < 0) character.x = 0;
+    if (character.x + character.width > world.width)
+        character.x = world.width - character.width;
+
+    interacting = false;
+    currentPortrait = null;
+
+    for (var i = 0; i < portraits.length; i++) {
+        var portrait = portraits[i];
+        if (
+            character.x + character.width > portrait.x &&
+            character.x < portrait.x + portrait.width
+        ) {
+            interacting = true;
+            currentPortrait = portrait;
+            break;
+        }
+    }
+
+    camera.x = character.x + character.width / 2 - canvas.width / 2;
+
+    if (camera.x < 0) camera.x = 0;
+    if (camera.x + camera.width > world.width)
+        camera.x = world.width - camera.width;
+
+    if (interacting && keyPressedW) {
+        camera.targetY = -500; 
+    } else {
+        camera.targetY = 0; 
+    }
+
+    var cameraSpeed = 0.1;
+    camera.y += (camera.targetY - camera.y) * cameraSpeed;
+}
+
+// 캔버스에 있는 걸 그리기
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+
+    ctx.translate(-camera.x, -camera.y);
+
+    //땅 
+    ctx.fillStyle = '#654321';
+    ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+
+    //명화
+    ctx.fillStyle = '#abcdef';
+    for (var i = 0; i < portraits.length; i++) {
+        var portrait = portraits[i];
+        ctx.fillRect(portrait.x, portrait.y, portrait.width, portrait.height);
+
+        ctx.strokeStyle = '#342423';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(portrait.x, portrait.y, portrait.width, portrait.height);
+    }
+
+    // 캐릭터
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(
+        character.x,
+        character.y,
+        character.width,
+        character.height
+    );
+
+    /*if (interacting && currentPortrait) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(
+            character.x - 100,
+            character.y - 150,
+            230,
+            100
+        );
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px Arial';
+        ctx.fillText(
+            currentPortrait.text,
+            character.x - 90,
+            character.y - 110
+        );
+
+        var time = Date.now() * 0.005;
+        var floatY = Math.sin(time) * 5;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.fillText(
+            'This is an amazing piece of art!',
+            character.x - 90,
+            character.y - 80 + floatY
+        );
+    }
+    */
+   
+if (interacting && currentPortrait) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(
+        character.x - 100,
+        character.y - 150,
+        230,
+        100
+    );
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '20px Arial';
+    ctx.fillText(
+        currentPortrait.text,
+        character.x - 90,
+        character.y - 110
+    );
+
+    //떠다니는
+    var time = Date.now() * 0.005;
+    var floatY = Math.sin(time) * 5;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '16px Arial';
+    ctx.fillText(
+            currentPortrait.message, 
+            character.x - 90,
+            character.y - 80 + floatY
+        );
+    }
+
+    ctx.restore();
+}
+
+        // 메인 게임 룹
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        // 게임 시작 룹
+        loop();
+    </script>
+</body>
+</html>
